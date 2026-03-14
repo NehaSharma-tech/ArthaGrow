@@ -58,17 +58,7 @@ function Navbar() {
       <nav className={`ag-navbar${scrolled ? ' scrolled' : ''}`}>
         <Link className="ag-navbar__logo" to="/">
           <img src="/media/images/logo1.png" alt="ArthaGrow"
-            style={{
-              height: '42px', width: 'auto',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.filter = 'invert(1) sepia(1) saturate(3) hue-rotate(90deg) brightness(1.35) drop-shadow(0 0 10px rgba(107,175,122,0.7))';
-              e.currentTarget.style.transform = 'scale(1.06)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.filter = 'invert(1) sepia(1) saturate(2.5) hue-rotate(90deg) brightness(1.15)';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
+            style={{height: '42px', width: 'auto'}}
           />
         </Link>
 
