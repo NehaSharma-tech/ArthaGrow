@@ -21,15 +21,16 @@ const { NseIndia } = require("stock-nse-india");
 
 const PORT = process.env.PORT || 3002;
 const uri = process.env.ATLASDB_URL;
-const FRONTEND_URL= process.env.FRONTEND_URL
-const DASHBOARD_URL= process.env.DASHBOARD_URL
 
 /* ---------------------- ALLOWED ORIGINS ---------------------- */
 
-// Both frontend (:3000) and dashboard (:3001) need cookie access to backend (:3002)
 const ALLOWED_ORIGINS = [
-  FRONTEND_URL,
-  DASHBOARD_URL
+  "http://localhost:3000",
+  "http://localhost:3001",
+  // Deployed frontend URLs — set in .env as comma-separated list
+  ...(process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(",").map(o => o.trim())
+    : []),
 ];
 
 const corsOptions = {
@@ -57,6 +58,58 @@ const io = new Server(server, {
 
 const nse = new NseIndia();
 
+/* ── NSE 403 fix: inject browser-like headers on every request ──
+   NSE blocks server-side requests that lack browser fingerprint headers.
+   We also bootstrap a session cookie by hitting the NSE homepage first.  */
+const axios = require("axios");
+const NSE_HEADERS = {
+  "User-Agent":
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+  "Accept":
+    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+  "Accept-Language": "en-US,en;q=0.9",
+  "Accept-Encoding": "gzip, deflate, br",
+  "Referer": "https://www.nseindia.com/",
+  "Origin": "https://www.nseindia.com",
+  "Connection": "keep-alive",
+  "Cache-Control": "no-cache",
+  "Sec-Fetch-Dest": "empty",
+  "Sec-Fetch-Mode": "cors",
+  "Sec-Fetch-Site": "same-origin",
+};
+
+// Store session cookies from NSE homepage visit
+let nseCookies = "";
+
+async function bootstrapNseSession() {
+  try {
+    const resp = await axios.get("https://www.nseindia.com", {
+      headers: NSE_HEADERS,
+      timeout: 10000,
+    });
+    // Extract Set-Cookie headers and join them
+    const rawCookies = resp.headers["set-cookie"];
+    if (rawCookies) {
+      nseCookies = rawCookies.map((c) => c.split(";")[0]).join("; ");
+      console.log("NSE session bootstrapped");
+    }
+  } catch (err) {
+    console.log("NSE session bootstrap failed:", err.message);
+  }
+}
+
+// Inject headers into every axios request (used internally by stock-nse-india)
+axios.interceptors.request.use((config) => {
+  if (config.url && config.url.includes("nseindia.com")) {
+    config.headers = {
+      ...config.headers,
+      ...NSE_HEADERS,
+      ...(nseCookies ? { Cookie: nseCookies } : {}),
+    };
+  }
+  return config;
+});
+
 /* ---------------------- MIDDLEWARE ---------------------- */
 
 app.use(cors(corsOptions));
@@ -67,7 +120,12 @@ app.use(cookieParser());
 /* ---------------------- DB CONNECTION ---------------------- */
 
 main()
-  .then(() => console.log("DB connection successful"))
+  .then(async () => {
+    console.log("DB connection successful");
+    await bootstrapNseSession();
+    // NSE session cookies expire ~30 min — refresh every 25 min
+    setInterval(bootstrapNseSession, 25 * 60 * 1000);
+  })
   .catch((err) => console.log(err));
 
 async function main() {
