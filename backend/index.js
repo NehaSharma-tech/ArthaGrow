@@ -7,13 +7,13 @@ const app = express();
 const cors = require("cors");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
-const authRoute  = require("./routes/AuthRoute");
+const authRoute = require("./routes/AuthRoute");
 const fundsRoute = require("./routes/FundsRoute");
 
 const { Holdings } = require("./models/holdingModel");
 const { Positions } = require("./models/positionModel");
-const { Orders }   = require("./models/orderModel");
-const { Funds }    = require("./models/fundsModel");
+const { Orders } = require("./models/orderModel");
+const { Funds } = require("./models/fundsModel");
 
 const http = require("http");
 const { Server } = require("socket.io");
@@ -22,27 +22,30 @@ const { NseIndia } = require("stock-nse-india");
 const PORT = process.env.PORT || 3002;
 const uri = process.env.ATLASDB_URL;
 
+// Trim + strip trailing slash to avoid silent CORS mismatches
+const clean = (url) => (url || "").trim().replace(/\/$/, "");
+const FRONTEND_URL = clean(process.env.FRONTEND_URL);
+const DASHBOARD_URL = clean(process.env.DASHBOARD_URL);
+
 /* ---------------------- ALLOWED ORIGINS ---------------------- */
 
 const ALLOWED_ORIGINS = [
   "http://localhost:3000",
   "http://localhost:3001",
-  // Deployed frontend URLs — set in .env as comma-separated list
-  ...(process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(",").map(o => o.trim())
-    : []),
-];
+  FRONTEND_URL,
+  DASHBOARD_URL,
+].filter(Boolean);
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // allow requests with no origin (e.g. curl, Postman)
+    // allow requests with no origin (curl, Postman, Thunder Client)
     if (!origin || ALLOWED_ORIGINS.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error(`CORS blocked: ${origin}`));
     }
   },
-  credentials: true, // required for cookies to be sent cross-origin
+  credentials: true,
 };
 
 /* ---------------------- HTTP SERVER ---------------------- */
@@ -58,27 +61,24 @@ const io = new Server(server, {
 
 const nse = new NseIndia();
 
-/* ── NSE 403 fix: inject browser-like headers on every request ──
-   NSE blocks server-side requests that lack browser fingerprint headers.
-   We also bootstrap a session cookie by hitting the NSE homepage first.  */
 const axios = require("axios");
+
 const NSE_HEADERS = {
   "User-Agent":
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-  "Accept":
+  Accept:
     "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
   "Accept-Language": "en-US,en;q=0.9",
   "Accept-Encoding": "gzip, deflate, br",
-  "Referer": "https://www.nseindia.com/",
-  "Origin": "https://www.nseindia.com",
-  "Connection": "keep-alive",
+  Referer: "https://www.nseindia.com/",
+  Origin: "https://www.nseindia.com",
+  Connection: "keep-alive",
   "Cache-Control": "no-cache",
   "Sec-Fetch-Dest": "empty",
   "Sec-Fetch-Mode": "cors",
   "Sec-Fetch-Site": "same-origin",
 };
 
-// Store session cookies from NSE homepage visit
 let nseCookies = "";
 
 async function bootstrapNseSession() {
@@ -87,7 +87,6 @@ async function bootstrapNseSession() {
       headers: NSE_HEADERS,
       timeout: 10000,
     });
-    // Extract Set-Cookie headers and join them
     const rawCookies = resp.headers["set-cookie"];
     if (rawCookies) {
       nseCookies = rawCookies.map((c) => c.split(";")[0]).join("; ");
@@ -98,7 +97,7 @@ async function bootstrapNseSession() {
   }
 }
 
-// Inject headers into every axios request (used internally by stock-nse-india)
+// Inject browser headers into every axios request to nseindia.com
 axios.interceptors.request.use((config) => {
   if (config.url && config.url.includes("nseindia.com")) {
     config.headers = {
@@ -123,8 +122,7 @@ main()
   .then(async () => {
     console.log("DB connection successful");
     await bootstrapNseSession();
-    // NSE session cookies expire ~30 min — refresh every 25 min
-    setInterval(bootstrapNseSession, 25 * 60 * 1000);
+    setInterval(bootstrapNseSession, 25 * 60 * 1000); // refresh every 25 min
   })
   .catch((err) => console.log(err));
 
@@ -135,7 +133,6 @@ async function main() {
 /* ---------------------- ROUTES ---------------------- */
 
 app.use("/", authRoute);
-app.use("/", fundsRoute);
 app.use("/", fundsRoute);
 
 app.get("/holdings", async (req, res) => {
@@ -156,9 +153,18 @@ app.get("/orders", async (req, res) => {
 /* ---------------------- WATCHLIST STOCKS ---------------------- */
 
 const watchlist = [
-  "RELIANCE", "TCS", "INFY", "HDFCBANK", "ICICIBANK",
-  "SBIN", "ITC", "HINDUNILVR", "LT", "KOTAKBANK",
-  "BAJFINANCE", "AXISBANK",
+  "RELIANCE",
+  "TCS",
+  "INFY",
+  "HDFCBANK",
+  "ICICIBANK",
+  "SBIN",
+  "ITC",
+  "HINDUNILVR",
+  "LT",
+  "KOTAKBANK",
+  "BAJFINANCE",
+  "AXISBANK",
 ];
 
 /* ---------------------- WEBSOCKET ---------------------- */
@@ -166,11 +172,8 @@ const watchlist = [
 io.on("connection", (socket) => {
   console.log("User connected to watchlist socket");
   socket.emit("connected", "WebSocket connected");
-
-  // Send current data immediately on connect (don't wait for next interval)
   fetchWatchlistPrices();
   fetchIndices();
-
   socket.on("disconnect", () => console.log("User disconnected"));
 });
 
@@ -182,12 +185,12 @@ async function fetchWatchlistPrices() {
       watchlist.map(async (symbol) => {
         const data = await nse.getEquityDetails(symbol);
         return {
-          name:    symbol,
-          price:   data.priceInfo.lastPrice,
+          name: symbol,
+          price: data.priceInfo.lastPrice,
           percent: Number(data.priceInfo.pChange).toFixed(2) + "%",
-          isDown:  data.priceInfo.pChange < 0,
+          isDown: data.priceInfo.pChange < 0,
         };
-      })
+      }),
     );
     io.emit("watchlistUpdate", stocks);
   } catch (err) {
@@ -199,11 +202,11 @@ async function fetchWatchlistPrices() {
 
 async function fetchIndices() {
   try {
-    const all  = await nse.getAllIndices();
+    const all = await nse.getAllIndices();
     const rows = all?.data || all || [];
 
-    const niftyRow  = rows.find(d => d.indexSymbol === "NIFTY 50");
-    const sensexRow = rows.find(d => d.indexSymbol === "NIFTY BANK"); // BSE SENSEX not on NSE — use NIFTY BANK
+    const niftyRow = rows.find((d) => d.indexSymbol === "NIFTY 50");
+    const sensexRow = rows.find((d) => d.indexSymbol === "NIFTY BANK");
 
     if (!niftyRow || !sensexRow) {
       console.log("Indices fetch: rows not found");
@@ -212,12 +215,12 @@ async function fetchIndices() {
 
     io.emit("indicesUpdate", {
       nifty: {
-        value:  niftyRow.last,
+        value: niftyRow.last,
         change: niftyRow.percentChange,
         isDown: niftyRow.percentChange < 0,
       },
       sensex: {
-        value:  sensexRow.last,
+        value: sensexRow.last,
         change: sensexRow.percentChange,
         isDown: sensexRow.percentChange < 0,
       },
@@ -228,7 +231,7 @@ async function fetchIndices() {
 }
 
 setInterval(fetchWatchlistPrices, 5000);
-setInterval(fetchIndices, 10000); // indices update every 10s (slower is fine)
+setInterval(fetchIndices, 10000);
 
 /* ---------------------- NEW ORDER ---------------------- */
 
@@ -243,21 +246,28 @@ app.post("/newOrder", async (req, res) => {
   if (existingHolding) {
     if (mode === "BUY") {
       const totalQty = existingHolding.qty + qty;
-      const totalInvestment = existingHolding.avg * existingHolding.qty + price * qty;
+      const totalInvestment =
+        existingHolding.avg * existingHolding.qty + price * qty;
       existingHolding.avg = totalInvestment / totalQty;
       existingHolding.qty = totalQty;
     } else if (mode === "SELL") {
       existingHolding.qty = existingHolding.qty - qty;
     }
     existingHolding.price = price;
-    const pnl = (existingHolding.price - existingHolding.avg) * existingHolding.qty;
+    const pnl =
+      (existingHolding.price - existingHolding.avg) * existingHolding.qty;
     existingHolding.net = pnl.toFixed(2);
     existingHolding.day = (pnl * 0.01).toFixed(2);
     await existingHolding.save();
   } else {
     if (mode === "BUY") {
       const newHolding = new Holdings({
-        name, qty, avg: price, price: price, net: "0", day: "0",
+        name,
+        qty,
+        avg: price,
+        price,
+        net: "0",
+        day: "0",
       });
       await newHolding.save();
     }
