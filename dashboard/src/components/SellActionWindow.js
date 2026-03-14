@@ -1,4 +1,4 @@
-import { BACKEND_URL, FRONTEND_URL } from "../config";
+import { BACKEND_URL } from "../config";
 import { useState, useContext, useEffect, useCallback } from "react";
 import axios from "axios";
 import GeneralContext from "./GeneralContext";
@@ -50,7 +50,7 @@ const SellActionWindow = ({ uid }) => {
   const handleKeyDown = useCallback((e) => {
     if (e.key === "Escape") generalContext.closeSellWindow();
     if (e.key === "Enter" && !loading) handleSell();
-  }, [qty, price, loading, generalContext, handleSell]);
+  }, [loading, generalContext, handleSell]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
