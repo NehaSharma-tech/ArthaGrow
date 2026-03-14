@@ -35,7 +35,7 @@ function Press() {
           gap: '1.25rem', marginTop: '3rem',
         }}>
           {PRESS.map((item, i) => (
-            <a key={i} href="#" style={{ textDecoration: 'none' }}
+            <a key={i} href="/" style={{ textDecoration: 'none' }}
               className={`reveal reveal-delay-${(i % 3) + 1}`}>
               <div style={{
                 background: 'var(--bg-card)',

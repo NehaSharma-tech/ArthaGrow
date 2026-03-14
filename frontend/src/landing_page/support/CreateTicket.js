@@ -132,7 +132,7 @@ function TopicCard({ topic, index }) {
       {/* Links */}
       <div style={{ padding: '0.5rem 0' }}>
         {(expanded ? topic.links : topic.links.slice(0, PREVIEW)).map((link, i) => (
-          <a key={i} href="#" style={{
+          <a key={i} href="/" style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             padding: '0.6rem 1.5rem',
             color: 'var(--text-muted)', textDecoration: 'none',

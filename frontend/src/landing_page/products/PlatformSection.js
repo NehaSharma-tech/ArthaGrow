@@ -123,7 +123,7 @@ function PlatformSection({
       {/* App badges */}
       {appLinks && (
         <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem', flexWrap: 'wrap' }}>
-          <a href="#" style={{
+          <a href="/" style={{
             display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
             padding: '0.5rem 1rem', borderRadius: '8px',
             background: 'var(--bg-card)',
@@ -139,7 +139,7 @@ function PlatformSection({
               <div style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-primary)' }}>Google Play</div>
             </div>
           </a>
-          <a href="#" style={{
+          <a href="/" style={{
             display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
             padding: '0.5rem 1rem', borderRadius: '8px',
             background: 'var(--bg-card)',

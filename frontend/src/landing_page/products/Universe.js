@@ -164,7 +164,7 @@ function Universe() {
               We write openly about our architecture, scaling challenges, and open-source contributions.
             </p>
           </div>
-          <a href="#" className="ag-btn-ghost" style={{ textDecoration: 'none', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>
+          <a href="/" className="ag-btn-ghost" style={{ textDecoration: 'none', fontSize: '0.875rem', whiteSpace: 'nowrap' }}>
             Read ArthaGrow.tech →
           </a>
         </div>

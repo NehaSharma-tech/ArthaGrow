@@ -1,8 +1,6 @@
 /* ============================================================
    MarqueeStrip.js  — scrolling live prices below the hero
    ============================================================ */
-import { useState, useEffect } from 'react';
-
 const STRIP_DATA = [
   { sym: 'NIFTY 50',  price: '22,485.60', chg: '+0.58%',  up: true  },
   { sym: 'SENSEX',    price: '73,648.62', chg: '+0.61%',  up: true  },

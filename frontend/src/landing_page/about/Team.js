@@ -94,7 +94,7 @@ function Team() {
               {/* Social links */}
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {['Website', 'TradeTalk', 'Twitter', 'LinkedIn'].map((s, i) => (
-                  <a key={i} href="#" style={{
+                  <a key={i} href="/" style={{
                     fontSize: '0.68rem', fontWeight: 600,
                     padding: '0.25rem 0.6rem', borderRadius: '100px',
                     border: '1px solid rgba(107,175,122,0.22)',
@@ -247,7 +247,7 @@ function Team() {
                 democratising finance in India.
               </p>
             </div>
-            <a href="#" className="ag-btn-primary" style={{ fontSize: '0.875rem', textDecoration: 'none' }}>
+            <a href="/" className="ag-btn-primary" style={{ fontSize: '0.875rem', textDecoration: 'none' }}>
               See open roles →
             </a>
           </div>
