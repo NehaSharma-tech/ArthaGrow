@@ -1,3 +1,4 @@
+import { BACKEND_URL } from "../config";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { io } from "socket.io-client";
@@ -13,14 +14,14 @@ const TopBar = ({ title = "Dashboard", subtitle = "", onMenuClick }) => {
   // ── Fetch user for avatar ──
   useEffect(() => {
     axios
-      .post("http://localhost:3002/verify", {}, { withCredentials: true })
+      .post(`${BACKEND_URL}/verify`, {}, { withCredentials: true })
       .then(({ data }) => { if (data.status) setUser(data.user); })
       .catch(() => {});
   }, []);
 
   // ── Socket: live index prices ──
   useEffect(() => {
-    const socket = io("http://localhost:3002", { withCredentials: true });
+    const socket = io(BACKEND_URL, { withCredentials: true });
 
     socket.on("indicesUpdate", ({ nifty, sensex }) => {
       const fmt = (val, chg) => ({

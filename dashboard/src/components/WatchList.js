@@ -1,3 +1,4 @@
+import { BACKEND_URL } from "../config";
 import { useState, useEffect, useContext } from "react";
 import { io } from "socket.io-client";
 import { Tooltip, Grow } from "@mui/material";
@@ -21,7 +22,7 @@ const WatchList = ({ open = false, onClose }) => {
   const [showChart, setShowChart] = useState(false);
 
   useEffect(() => {
-    const socket = io("http://localhost:3002", { withCredentials: true });
+    const socket = io(BACKEND_URL+ { withCredentials: true });
 
     socket.on("watchlistUpdate", (data) => {
       setWatchlist(data);

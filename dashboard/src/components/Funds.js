@@ -1,3 +1,4 @@
+import { BACKEND_URL, FRONTEND_URL } from "../config";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -14,7 +15,7 @@ const Funds = () => {
   // ── BACKEND: fetch per-user funds on mount ──
   useEffect(() => {
     axios
-      .get("http://localhost:3002/funds", { withCredentials: true })
+      .get(`${BACKEND_URL}/funds`, { withCredentials: true })
       .then((res) => { if (res.data.success) setFunds(res.data.funds); })
       .catch((err) => console.log(err))
       .finally(() => setLoading(false));
@@ -35,7 +36,7 @@ const Funds = () => {
     setActionLoading(true);
     try {
       const res = await axios.patch(
-        "http://localhost:3002/funds/add",
+        `${BACKEND_URL}/funds/add`,
         { amount: Number(fundAmount) },
         { withCredentials: true }
       );
@@ -60,7 +61,7 @@ const Funds = () => {
     setActionLoading(true);
     try {
       const res = await axios.patch(
-        "http://localhost:3002/funds/withdraw",
+        `${BACKEND_URL}/funds/withdraw`,
         { amount: Number(fundAmount) },
         { withCredentials: true }
       );
@@ -310,7 +311,7 @@ const Funds = () => {
             <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", maxWidth: "280px", textAlign: "center", marginBottom: "1.25rem" }}>
               Trade gold, silver, crude oil and agri commodities on MCX.
             </div>
-            <a href="http://localhost:3000/signup" style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", padding: "0.5rem 1.1rem", background: "var(--blue)", color: "#fff", borderRadius: "var(--radius-md)", textDecoration: "none", fontSize: "0.8rem", fontWeight: 600 }}>
+            <a href={`${FRONTEND_URL}/signup`} style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem", padding: "0.5rem 1.1rem", background: "var(--blue)", color: "#fff", borderRadius: "var(--radius-md)", textDecoration: "none", fontSize: "0.8rem", fontWeight: 600 }}>
               Open Commodity Account →
             </a>
           </div>

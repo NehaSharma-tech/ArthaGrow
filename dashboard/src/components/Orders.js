@@ -1,3 +1,4 @@
+import { BACKEND_URL } from "../config";
 import axios from "axios";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -10,7 +11,7 @@ const Orders = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3002/orders", { withCredentials: true })
+      .get(`${BACKEND_URL}/orders`, { withCredentials: true })
       .then((res) => setAllOrders(res.data))
       .catch((err) => console.log(err))
       .finally(() => setLoading(false));

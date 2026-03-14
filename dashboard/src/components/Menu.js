@@ -1,3 +1,4 @@
+import { BACKEND_URL, FRONTEND_URL } from "../config";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import axios from "axios";
@@ -21,7 +22,7 @@ const Menu = ({ open = false, onClose }) => {
     const fetchUser = async () => {
       try {
         const { data } = await axios.post(
-          "http://localhost:3002/verify",
+          `${BACKEND_URL}/verify`,
           {},
           { withCredentials: true }
         );
@@ -35,9 +36,9 @@ const Menu = ({ open = false, onClose }) => {
 
   const handleLogout = async () => {
     try {
-      await axios.get("http://localhost:3002/logout", { withCredentials: true });
+      await axios.get(`${BACKEND_URL}/logout`, { withCredentials: true });
     } catch (e) { /* ignore */ }
-    window.location.href = "http://localhost:3000/login";
+    window.location.href = `${FRONTEND_URL}/login`;
   };
 
   // Get initials from username
@@ -61,7 +62,7 @@ const Menu = ({ open = false, onClose }) => {
     <aside className={`ag-sidebar${open ? " open" : ""}`}>
 
       {/* Logo */}
-      <a className="ag-sidebar__logo" href="http://localhost:3000">
+      <a className="ag-sidebar__logo" href={`${FRONTEND_URL}`}>
         <img src="/logo1.png" alt="ArthaGrow" />
         <span className="ag-sidebar__logo-text">ArthaGrow</span>
       </a>

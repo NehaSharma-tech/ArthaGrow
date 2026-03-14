@@ -1,3 +1,5 @@
+import { BACKEND_URL } from "../config";
+
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { VerticalGraph } from "./VerticalGraph";
@@ -12,7 +14,7 @@ const Holdings = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3002/holdings", { withCredentials: true })
+      .get(`${BACKEND_URL}/holdings`, { withCredentials: true })
       .then((res) => {
         console.log(res.data);           // ── BACKEND: kept as-is
         setAllHoldings(res.data);

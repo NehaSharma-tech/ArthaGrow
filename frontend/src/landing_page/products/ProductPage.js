@@ -5,10 +5,11 @@ import OpenAccount from '../OpenAccount';
 
 // Check if user is logged in via cookie
 const isLoggedIn = () => document.cookie.split(';').some(c => c.trim().startsWith('token='));
+const DASHBOARD_URL = process.env.REACT_APP_DASHBOARD_URL;
 
 const handleDashboardCTA = () => {
   if (isLoggedIn()) {
-    window.location.href = 'http://localhost:3001';
+    window.location.href = DASHBOARD_URL;
   } else {
     window.location.href = '/login';
   }

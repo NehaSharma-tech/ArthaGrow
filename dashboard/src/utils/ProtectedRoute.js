@@ -1,3 +1,4 @@
+import { BACKEND_URL, FRONTEND_URL } from "../config";
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -8,6 +9,7 @@ import axios from 'axios';
  * - Not verified → redirect to frontend login on :3000
  * - Loading    → show a minimal spinner so there's no flash
  */
+
 function ProtectedRoute({ children }) {
   const [authState, setAuthState] = useState('loading'); // 'loading' | 'ok' | 'fail'
 
@@ -15,11 +17,10 @@ function ProtectedRoute({ children }) {
     const verify = async () => {
       try {
         const { data } = await axios.post(
-          'http://localhost:3002/verify',
+          `${BACKEND_URL}/verify`,
           {},
           { withCredentials: true }  // sends the cookie cross-origin to :3002
         );
-
         if (data.status) {
           setAuthState('ok');
         } else {
@@ -35,7 +36,7 @@ function ProtectedRoute({ children }) {
 
   // Redirect to frontend login if not authenticated
   if (authState === 'fail') {
-    window.location.href = 'http://localhost:3000/login';
+    window.location.href = `${FRONTEND_URL}/login`;
     return null;
   }
 

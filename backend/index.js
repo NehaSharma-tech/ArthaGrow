@@ -21,13 +21,15 @@ const { NseIndia } = require("stock-nse-india");
 
 const PORT = process.env.PORT || 3002;
 const uri = process.env.ATLASDB_URL;
+const FRONTEND_URL= process.env.FRONTEND_URL
+const DASHBOARD_URL= process.env.DASHBOARD_URL
 
 /* ---------------------- ALLOWED ORIGINS ---------------------- */
 
 // Both frontend (:3000) and dashboard (:3001) need cookie access to backend (:3002)
 const ALLOWED_ORIGINS = [
-  "http://localhost:3000",
-  "http://localhost:3001",
+  FRONTEND_URL,
+  DASHBOARD_URL
 ];
 
 const corsOptions = {

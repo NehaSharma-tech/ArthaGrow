@@ -1,3 +1,4 @@
+import { BACKEND_URL } from "../config";
 import axios from "axios";
 import { useState, useEffect } from "react";
 
@@ -9,7 +10,7 @@ const Positions = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:3002/positions", { withCredentials: true })
+      .get(`${BACKEND_URL}/positions`, { withCredentials: true })
       .then((res) => {
         console.log(res.data); // ── BACKEND: kept as-is
         setAllPositions(res.data);

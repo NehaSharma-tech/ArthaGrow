@@ -2,6 +2,17 @@ const { Users } = require("../models/userModel");
 const { createSecretToken } = require("../utils/SecretToken");
 const bcrypt = require("bcrypt");
 
+// ── Cookie options — same object used for both set AND clear ──
+// In production (HTTPS + cross-origin), cookies MUST have sameSite:none + secure:true
+const isProd = process.env.NODE_ENV === "production";
+
+const cookieOptions = {
+  httpOnly: false,                       // false so JS can read it for auth state check
+  secure: isProd,                        // true on HTTPS (required for sameSite:none)
+  sameSite: isProd ? "none" : "lax",    // none = cross-origin HTTPS; lax = local dev
+  maxAge: 3 * 24 * 60 * 60 * 1000,     // 3 days
+};
+
 module.exports.Signup = async (req, res, next) => {
   try {
     const { email, password, username, createdAt } = req.body;
@@ -14,21 +25,12 @@ module.exports.Signup = async (req, res, next) => {
     const user = await Users.create({ email, password, username, createdAt });
     const token = createSecretToken(user._id);
 
-    // Set token as cookie only (cookie-only strategy)
-    res.cookie("token", token, {
-      httpOnly: false,   // false so frontend JS can read it if needed
-      sameSite: "lax",   // lax allows cross-origin GET redirects to carry cookie
-      maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days in ms
-    });
+    res.cookie("token", token, cookieOptions);
 
     res.status(201).json({
       message: "Signup successful",
       success: true,
-      user: {
-        id: user._id,
-        email: user.email,
-        username: user.username,
-      },
+      user: { id: user._id, email: user.email, username: user.username },
     });
 
   } catch (error) {
@@ -57,21 +59,12 @@ module.exports.Login = async (req, res, next) => {
 
     const token = createSecretToken(user._id);
 
-    // Set token as cookie only (cookie-only strategy)
-    res.cookie("token", token, {
-      httpOnly: false,
-      sameSite: "lax",
-      maxAge: 3 * 24 * 60 * 60 * 1000, // 3 days in ms
-    });
+    res.cookie("token", token, cookieOptions);
 
     res.status(201).json({
       message: "Login successful",
       success: true,
-      user: {
-        id: user._id,
-        email: user.email,
-        username: user.username,
-      },
+      user: { id: user._id, email: user.email, username: user.username },
     });
 
   } catch (error) {
@@ -79,3 +72,5 @@ module.exports.Login = async (req, res, next) => {
     res.status(500).json({ message: "Internal server error", success: false });
   }
 };
+
+module.exports.cookieOptions = cookieOptions;

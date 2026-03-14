@@ -1,3 +1,4 @@
+import { BACKEND_URL } from "../config";
 import { useState, useContext, useEffect, useCallback } from "react";
 import axios from "axios";
 import GeneralContext from "./GeneralContext";
@@ -39,7 +40,7 @@ const BuyActionWindow = ({ uid }) => {
 
     try {
       setLoading(true);
-      await axios.post("http://localhost:3002/newOrder", {
+      await axios.post(`${BACKEND_URL}/newOrder`, {
         name:  uid,
         qty:   Number(qty),
         price: isMarket ? 0 : Number(price),

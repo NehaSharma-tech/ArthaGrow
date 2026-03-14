@@ -1,3 +1,4 @@
+import { BACKEND_URL } from "../config";
 import { useState, useEffect } from "react";
 import axios from "axios";
 
@@ -12,9 +13,9 @@ const Summary = () => {
       try {
         // Fetch user + holdings + funds in parallel
         const [verifyRes, holdingsRes, fundsRes] = await Promise.all([
-          axios.post("http://localhost:3002/verify",   {}, { withCredentials: true }),
-          axios.get("http://localhost:3002/holdings",      { withCredentials: true }),
-          axios.get("http://localhost:3002/funds",         { withCredentials: true }),
+          axios.post(`${BACKEND_URL}/verify`,   {}, { withCredentials: true }),
+          axios.get(`${BACKEND_URL}/holdings`,      { withCredentials: true }),
+          axios.get(`${BACKEND_URL}/funds`,         { withCredentials: true }),
         ]);
 
         if (verifyRes.data.status) setUser(verifyRes.data.user);
