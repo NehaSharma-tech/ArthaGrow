@@ -1,4 +1,4 @@
-import { BACKEND_URL } from "../config";
+import { BACKEND_URL, FRONTEND_URL } from "../config";
 import { useState, useContext, useEffect, useCallback } from "react";
 import axios from "axios";
 import GeneralContext from "./GeneralContext";
@@ -23,18 +23,7 @@ const SellActionWindow = ({ uid }) => {
   const isSL      = orderType === "SL" || orderType === "SL-M";
   const marginReq = qty && price ? (qty * parseFloat(price || 0) * 0.2).toFixed(2) : "—";
 
-  // ── Keyboard: Escape closes, Enter submits ──
-  const handleKeyDown = useCallback((e) => {
-    if (e.key === "Escape") generalContext.closeSellWindow();
-    if (e.key === "Enter" && !loading) handleSell();
-  }, [qty, price, loading]);
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
-
-  const handleSell = async () => {
+  const handleSell = useCallback(async () => {
     if (!qty || qty <= 0) return;
     if (!isMarket && !price) return;
 
@@ -55,7 +44,18 @@ const SellActionWindow = ({ uid }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [qty, price, isMarket, uid, generalContext]);
+
+  // ── Keyboard: Escape closes, Enter submits ──
+  const handleKeyDown = useCallback((e) => {
+    if (e.key === "Escape") generalContext.closeSellWindow();
+    if (e.key === "Enter" && !loading) handleSell();
+  }, [qty, price, loading, generalContext, handleSell]);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
 
   return (
     <>

@@ -18,7 +18,7 @@ const Orders = () => {
   }, []);
 
   // ── BACKEND: calculate totals (unchanged logic) ──
-  const totalBuy  = allOrders.filter((o) => o.mode === "BUY") .reduce((acc, o) => acc + o.qty * o.price, 0);
+  const totalBuy  = allOrders.filter((o) => o.mode === "BUY").reduce((acc, o) => acc + o.qty * o.price, 0);
   const totalSell = allOrders.filter((o) => o.mode === "SELL").reduce((acc, o) => acc + o.qty * o.price, 0);
   const netInvestment = totalBuy - totalSell;
 
