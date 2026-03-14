@@ -3,9 +3,8 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 
-// Trim to remove accidental spaces in .env values
-const BACKEND_URL   = process.env.REACT_APP_BACKEND_URL  
-const DASHBOARD_URL = process.env.REACT_APP_DASHBOARD_URL
+const BACKEND_URL   = (process.env.REACT_APP_BACKEND_URL   || "http://localhost:3002").trim().replace(/\/$/, "");
+const DASHBOARD_URL = (process.env.REACT_APP_DASHBOARD_URL || "http://localhost:3001").trim().replace(/\/$/, "");
 
 const Login = () => {
   const [inputValue, setInputValue] = useState({ email: "", password: "" });
@@ -34,7 +33,7 @@ const Login = () => {
       setLoading(true);
 
       const { data } = await axios.post(
-        `${BACKEND_URL}/login`,      // ← /login with leading slash
+        `${BACKEND_URL}/login`,      
         { ...inputValue },
         { withCredentials: true }
       );

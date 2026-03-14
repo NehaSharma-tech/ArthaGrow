@@ -3,9 +3,8 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 
-// Trim to remove accidental spaces in .env values, strip trailing slash
-const BACKEND_URL   = process.env.REACT_APP_BACKEND_URL   
-const DASHBOARD_URL = process.env.REACT_APP_DASHBOARD_URL
+const BACKEND_URL   = (process.env.REACT_APP_BACKEND_URL   || "http://localhost:3002").trim().replace(/\/$/, "");
+const DASHBOARD_URL = (process.env.REACT_APP_DASHBOARD_URL || "http://localhost:3001").trim().replace(/\/$/, "");
 
 const Signup = () => {
   const [inputValue, setInputValue] = useState({ email: "", password: "", username: "" });
