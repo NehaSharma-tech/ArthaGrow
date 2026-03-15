@@ -2,14 +2,6 @@ import { BACKEND_URL, FRONTEND_URL } from "../config";
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
-/**
- * ProtectedRoute
- * Calls backend /verify with the httpOnly cookie.
- * - Verified   → render children (dashboard)
- * - Not verified → redirect to frontend login on :3000
- * - Loading    → show a minimal spinner so there's no flash
- */
-
 function ProtectedRoute({ children }) {
   const [authState, setAuthState] = useState('loading'); // 'loading' | 'ok' | 'fail'
 
@@ -19,14 +11,12 @@ function ProtectedRoute({ children }) {
         const { data } = await axios.post(
           `${BACKEND_URL}/verify`,
           {},
-          { withCredentials: true }  // sends the cookie cross-origin to :3002
+          { withCredentials: true }
         );
-        if (data.status) {
-          setAuthState('ok');
-        } else {
-          setAuthState('fail');
-        }
+        // data.status is true if token is valid
+        setAuthState(data.status ? 'ok' : 'fail');
       } catch (error) {
+        console.error('ProtectedRoute verify error:', error.message);
         setAuthState('fail');
       }
     };
@@ -34,13 +24,7 @@ function ProtectedRoute({ children }) {
     verify();
   }, []);
 
-  // Redirect to frontend login if not authenticated
-  if (authState === 'fail') {
-    window.location.href = `${FRONTEND_URL}/login`;
-    return null;
-  }
-
-  // Minimal loading screen while verifying
+  // ── Loading: show spinner while /verify is in flight ──
   if (authState === 'loading') {
     return (
       <div style={{
@@ -66,7 +50,14 @@ function ProtectedRoute({ children }) {
     );
   }
 
-  // Auth verified — render dashboard
+  // ── Fail: only redirect AFTER verify completes, never during loading ──
+  if (authState === 'fail') {
+    const loginUrl = `${FRONTEND_URL}/login`.replace(/([^:]\/)\/+/g, '$1');
+    window.location.href = loginUrl;
+    return null;
+  }
+
+  // ── OK: render the dashboard ──
   return children;
 }
 
