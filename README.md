@@ -11,7 +11,6 @@ A full-stack MERN application for equity trading with real-time NSE market data,
 [![Live Frontend](https://img.shields.io/badge/Frontend-Live-brightgreen?style=flat-square&logo=vercel)](https://arthagrow.vercel.app)
 [![Live Dashboard](https://img.shields.io/badge/Dashboard-Live-brightgreen?style=flat-square&logo=vercel)](https://arthagrow-dashboard.vercel.app)
 [![Backend API](https://img.shields.io/badge/Backend-Live-brightgreen?style=flat-square&logo=render)](https://arthagrow.onrender.com)
-[![License](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE)
 
 </div>
 
